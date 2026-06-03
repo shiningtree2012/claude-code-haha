@@ -1274,6 +1274,7 @@ describe('WebSocket Chat Integration', () => {
       expect(titleMessages[0]?.title).toBe('看一下这个搜索结果，请一条一条给我列出来')
       expect(titleMessages.map((msg) => msg.title)).toContain('Google 搜索企查查结果')
       expect(upstreamInputs.some((input) => input.includes('Echo: 看一下这个搜索结果'))).toBe(true)
+      expect(upstreamInputs.some((input) => input.includes('Return the title in Chinese.'))).toBe(true)
     } finally {
       titleModelServer.stop(true)
       if (originalProviderConfig === null) {

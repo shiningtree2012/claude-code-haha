@@ -23,6 +23,7 @@ import {
   buildConversationTitleInput,
   deriveTitle,
   generateTitle,
+  resolveTitleLanguagePreference,
   saveAiTitle,
   type TitleConversationTurn,
 } from '../services/titleService.js'
@@ -835,7 +836,16 @@ function triggerTitleGeneration(
 
   void (async () => {
     try {
-      const aiTitle = await generateTitle(text, runtimeProviderId)
+      const responseLanguage = await getResponseLanguageSetting()
+      const titleLanguagePreference = resolveTitleLanguagePreference(
+        state.firstUserMessage,
+        responseLanguage,
+      )
+      const aiTitle = await generateTitle(
+        text,
+        runtimeProviderId,
+        titleLanguagePreference,
+      )
       if (generationSeq !== state.generationSeq) return
       if (aiTitle) {
         const saved = await saveAiTitle(sessionId, aiTitle)
@@ -849,6 +859,13 @@ function triggerTitleGeneration(
       console.error(`[Title] Failed to generate title for ${sessionId}:`, err)
     }
   })()
+}
+
+async function getResponseLanguageSetting(): Promise<string | undefined> {
+  const userSettings = await settingsService.getUserSettings().catch(() => ({}))
+  return typeof userSettings.language === 'string'
+    ? userSettings.language
+    : undefined
 }
 
 function sendSessionTitleUpdated(
